@@ -657,7 +657,7 @@
   // ==================== UI & STATE ====================
   let colegios = [];
   let charts = {};
-  const defaultCands = [{nombre:'UGT', votos:0}, {nombre:'CCOO', votos:0}, {nombre:'USO', votos:0}];
+  const defaultCands = [{nombre:'UGT', votos:0}, {nombre:'CCOO', votos:0}, {nombre:'FETICO', votos:0}];
 
   document.getElementById('censo-total').addEventListener('input', e => {
     document.getElementById('delegados-info').textContent = `Delegados: ${calcularDelegados(parseInt(e.target.value)||0)}`;
