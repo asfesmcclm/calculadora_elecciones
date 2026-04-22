@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1a0a0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Elecciones Sindicales · Art. 71.2 ET</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      /* Fondo oscuro rojizo */
+      --bg-primary: #1a0a0a;
+      --bg-secondary: #2d1515;
+      --bg-tertiary: #3d1f1f;
+      --bg-card: #241010;
+      --bg-input: #2d1818;
+      
+      /* Colores principales */
+      --primary: #e63946;
+      --primary-dark: #b91c2c;
+      --primary-light: #ff6b7a;
+      
+      /* Textos */
+      --text-primary: #f5e6e6;
+      --text-secondary: #d4b8b8;
+      --text-muted: #b89494;
+      --text-disabled: #8a6666;
+      
+      /* Bordes y acentos */
+      --border: #4a2828;
+      --border-light: #5c3535;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --info: #2196f3;
+      
+      /* Sombras */
+      --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+      
+      --radius: 14px;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      height: 100dvh;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+    }
+
+    .app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-primary);
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+    }
+
+    .app-header {
+      background: var(--bg-secondary);
+      padding: 20px 20px 12px;
+      box-shadow: var(--shadow-sm);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .app-header h1 {
+      font-size: 1.5rem;
+      color: var(--primary);
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .app-header h1::before {
+      content: "⚖";
+      margin-right: 6px;
+      font-weight: normal;
+    }
+
+    .app-header .sub {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      margin-top: 4px;
+    }
+
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 16px 24px;
+      scroll-behavior: smooth;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      border: 1px solid var(--border);
+    }
+
+    .card:active {
+      transform: scale(0.98);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.05s ease;
+    }
+
+    .btn {
+      padding: 0.65rem 1.1rem;
+      border: none;
+      border-radius: 44px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.2s ease, opacity 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #FFF;
+      box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3);
+    }
+
+    .btn-primary:active {
+      background: var(--primary-dark);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary-light);
+    }
+
+    .btn-outline:active {
+      background: rgba(230, 57, 70, 0.1);
+      transform: scale(0.96);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #FFF;
+    }
+
+    .btn-danger:active {
+      background: #d32f2f;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-weight: 500;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    input {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.9rem;
+      background: var(--bg-input);
+      color: var(--text-primary);
+      transition: all 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.2);
+      background: var(--bg-tertiary);
+    }
+
+    input::placeholder {
+      color: var(--text-disabled);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: rgba(230, 57, 70, 0.2);
+      color: var(--primary-light);
+      border: 1px solid var(--border);
+    }
+
+    .college {
+      border: none;
+      margin-bottom: 1rem;
+    }
+
+    .college-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .candidatura-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      align-items: center;
+    }
+
+    .candidatura-row input:first-child {
+      flex: 3;
+      min-width: 130px;
+    }
+
+    .candidatura-row input:nth-child(2) {
+      flex: 1;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0 0.3rem;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+      font-weight: bold;
+    }
+
+    .remove-btn::before {
+      content: "×";
+    }
+
+    .remove-btn span {
+      display: none;
+    }
+
+    .remove-btn:active {
+      opacity: 1;
+      transform: scale(0.9);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+
+    .alert {
+      padding: 0.8rem;
+      border-radius: 12px;
+      margin-bottom: 0.8rem;
+      font-size: 0.85rem;
+      border-left: 4px solid;
+    }
+
+    .alert-warning {
+      background: rgba(255, 152, 0, 0.1);
+      border-color: var(--warning);
+      color: #ffb74d;
+    }
+
+    .alert-info {
+      background: rgba(33, 150, 243, 0.1);
+      border-color: var(--info);
+      color: #64b5f6;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 0.5rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--bg-secondary);
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+
+    td {
+      color: var(--text-secondary);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 240px;
+      margin: 0.8rem 0;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-box {
+      background: var(--bg-secondary);
+      padding: 0.8rem;
+      border-radius: 16px;
+      text-align: center;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-box:active {
+      transform: scale(0.98);
+    }
+
+    .stat-box .num {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-box .label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    .bottom-nav {
+      background: rgba(45, 21, 21, 0.96);
+      backdrop-filter: blur(10px);
+      border-top: 0.5px solid var(--border);
+      padding: 8px 20px;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: transform 0.1s ease, color 0.1s;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 40px;
+    }
+
+    .nav-item:active {
+      transform: scale(0.94);
+      color: var(--primary);
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      font-size: 18px;
+      font-weight: normal;
+      font-family: monospace;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .page-break-inside {
+      page-break-inside: avoid;
+    }
+
+    .calc-detail {
+      background: var(--bg-secondary);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+
+    .calc-detail summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .hare-table {
+      overflow-x: auto;
+      margin: 0.8rem 0;
+    }
+
+    .hare-table .assigned {
+      background: rgba(76, 175, 80, 0.1);
+      font-weight: 600;
+    }
+
+    .pdf-header {
+      display: none;
+      text-align: center;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 0.5rem;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      .pdf-header {
+        display: block !important;
+      }
+      .card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+      }
+      body {
+        background: white;
+      }
+    }
+
+    .main-content::-webkit-scrollbar {
+      width: 4px;
+    }
+    .main-content::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+      border-radius: 10px;
+    }
+    .main-content::-webkit-scrollbar-thumb {
+      background: var(--primary-dark);
+      border-radius: 10px;
+    }
+
+    h2, h3, h4 {
+      color: var(--text-primary);
+    }
+
+    h2::before {
+      content: "▸ ";
+      color: var(--primary);
+    }
+
+    h3::before {
+      content: "▪ ";
+      color: var(--primary-light);
+    }
+
+    summary::before {
+      content: "▼ ";
+      font-size: 0.8rem;
+    }
+
+    details[open] summary::before {
+      content: "▲ ";
+    }
+
+    .icon-text::before {
+      margin-right: 6px;
+      display: inline-block;
+    }
+
+    .company-icon::before {
+      content: "🏢";
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="app-header no-print">
+    <h1>Elecciones Sindicales</h1>
+    <div class="sub">Método de cociente y restos · Art. 71.2 ET</div>
+  </div>
+
+  <div class="main-content" id="mainContent">
+    <div class="pdf-header" id="pdf-header">
+      <h2 style="margin-bottom:0.2rem; color:#e63946;">ACTA PROVISIONAL DE RESULTADOS</h2>
+      <p id="pdf-meta" style="font-size:0.85rem; color:#d4b8b8;">Empresa: --- | Fecha: ---</p>
+    </div>
+
+    <div class="no-print">
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <label>🏢 Empresa</label>
+            <input type="text" id="empresa" placeholder="Ej: Logística Norte S.L.">
+          </div>
+          <div>
+            <label>📊 Censo total</label>
+            <input type="number" id="censo-total" min="6" value="400">
+            <small id="delegados-info" class="badge">Delegados: 13</small>
+          </div>
+        </div>
+        <div class="alert alert-info" style="margin-top:0.8rem">
+          ▸ Umbral legal: 5% de votos válidos
+        </div>
+      </div>
+
+      <div id="colegios-container"></div>
+
+      <div class="actions">
+        <button class="btn btn-outline" id="add-colegio">+ Añadir colegio</button>
+        <button class="btn btn-primary" id="calcular">▶ Calcular</button>
+        <button class="btn btn-danger" id="limpiar">↺ Limpiar</button>
+      </div>
+    </div>
+
+    <div id="pdf-wrapper">
+      <section id="resultados" class="card hidden">
+        <h2 style="margin-bottom: 1rem;">Resultados</h2>
+        <div class="summary-grid" id="summary-stats"></div>
+        
+        <div class="grid-2">
+          <div>
+            <h3 style="font-size: 1rem;">Distribución de votos</h3>
+            <div class="chart-container"><canvas id="chart-votos"></canvas></div>
+          </div>
+          <div>
+            <h3 style="font-size: 1rem;">Reparto de delegados</h3>
+            <div class="chart-container"><canvas id="chart-delegados"></canvas></div>
+          </div>
+        </div>
+
+        <details class="calc-detail no-print">
+          <summary>Ver detalle del cálculo (Método Hare)</summary>
+          <div class="calc-context" id="calc-context"></div>
+          <div class="hare-table" id="hare-table-container"></div>
+        </details>
+
+        <h3 style="margin-top:1rem;">Desglose por colegio</h3>
+        <div id="desglose-colegios"></div>
+        
+        <div class="alert alert-warning no-print">
+          ⚖ Herramienta de apoyo · Validar por Mesa Electoral
+        </div>
+        
+        <div class="actions no-print" style="justify-content: flex-end;">
+          <button class="btn btn-primary" onclick="generatePDF()">📄 Generar PDF</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="bottom-nav no-print">
+    <button class="nav-item active" data-tab="calculadora" id="tabCalculadora">
+      <span class="nav-icon">⌨</span>
+      <span>Calculadora</span>
+    </button>
+    <button class="nav-item" data-tab="info" id="tabInfo">
+      <span class="nav-icon">⚖</span>
+      <span>Info Legal</span>
+    </button>
+    <button class="nav-item" data-tab="ayuda" id="tabAyuda">
+      <span class="nav-icon">?</span>
+      <span>Ayuda</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  // ==================== LÓGICA ORIGINAL ====================
+  const calcularDelegados = (t) => {
+    if (t < 6) return 0; if (t <= 10) return 1; if (t <= 20) return 2; if (t <= 30) return 3;
+    if (t <= 49) return 3; if (t <= 100) return 5; if (t <= 250) return 9; if (t <= 500) return 13;
+    if (t <= 750) return 17; if (t <= 1000) return 21; return Math.min(75, 21 + Math.ceil((t - 1000) / 1000) * 2);
+  };
+
+  const repartirDelegadosPorColegios = (totalDelegados, colegios) => {
+    const totalT = colegios.reduce((s, c) => s + c.trabajadores, 0);
+    if (!totalT) return colegios.map(() => 0);
+    const q = totalDelegados / totalT;
+    let arr = colegios.map((c, idx) => ({
+      idx,
+      base: Math.floor(c.trabajadores * q),
+      resto: (c.trabajadores * q) - Math.floor(c.trabajadores * q)
+    }));
+    let asignados = arr.reduce((sum, a) => sum + a.base, 0);
+    let pendientes = totalDelegados - asignados;
+    arr.sort((a, b) => b.resto - a.resto);
+    for (let i = 0; i < pendientes; i++) arr[i].base++;
+    arr.sort((a, b) => a.idx - b.idx);
+    return arr.map(a => a.base);
+  };
+
+  const calcularHareConDetalle = (votosCandidaturas, delegados, votosBlancos = 0) => {
+    const validos = Object.values(votosCandidaturas).reduce((a, b) => a + b, 0) + votosBlancos;
+    const umbral = validos * 0.05;
+    const elegibles = {};
+    Object.entries(votosCandidaturas).forEach(([k, v]) => { 
+      if (k.toLowerCase() !== 'en blanco' && v >= umbral) elegibles[k] = v; 
+    });
+    const resultado = Object.keys(votosCandidaturas).reduce((a, k) => ({...a, [k]: 0}), {});
+    if (!Object.keys(elegibles).length || !delegados || validos === 0) {
+      return { resultado, tabla: [], cociente: 0, umbral, validos, votosBlancos };
+    }
+    const cociente = validos / delegados;
+    let calculo = Object.entries(elegibles).map(([candidatura, votosCand]) => {
+      const division = votosCand / cociente;
+      const enteros = Math.floor(division);
+      return { candidatura, votos: votosCand, enteros, resto: division - enteros, cocienteStr: division.toFixed(2) };
+    });
+    let asignados = calculo.reduce((sum, c) => sum + c.enteros, 0);
+    let pendientes = delegados - asignados;
+    calculo.sort((a, b) => b.resto !== a.resto ? b.resto - a.resto : b.votos - a.votos);
+    for (let i = 0; i < pendientes && i < calculo.length; i++) {
+      calculo[i].enteros++;
+      calculo[i].sobrante = true;
+    }
+    calculo.sort((a, b) => a.candidatura.localeCompare(b.candidatura));
+    calculo.forEach(c => resultado[c.candidatura] = c.enteros);
+    return { resultado, tabla: calculo, cociente, umbral, validos, votosBlancos };
+  };
+
+  // ==================== UI & STATE ====================
+  let colegios = [];
+  let charts = {};
+  const defaultCands = [{nombre:'UGT', votos:0}, {nombre:'CCOO', votos:0}, {nombre:'USO', votos:0}];
+
+  document.getElementById('censo-total').addEventListener('input', e => {
+    document.getElementById('delegados-info').textContent = `Delegados: ${calcularDelegados(parseInt(e.target.value)||0)}`;
+  });
+
+  const renderColegios = () => {
+    const c = document.getElementById('colegios-container');
+    c.innerHTML = '';
+    colegios.forEach((col, i) => {
+      const div = document.createElement('div'); div.className = 'card college';
+      div.innerHTML = `
+        <div class="college-header">
+          <div style="flex:1">
+            <label>Colegio ${i+1}</label>
+            <input type="text" value="${col.nombre}" onchange="colegios[${i}].nombre=this.value" style="margin-bottom:0.4rem">
+            <label>Trabajadores</label>
+            <input type="number" value="${col.trabajadores}" min="1" onchange="colegios[${i}].trabajadores=parseInt(this.value)||0">
+          </div>
+          <button class="btn btn-outline" onclick="window.addCandidatura(${i})">+ Candidatura</button>
+        </div>
+        <div id="cands-${i}">
+          ${col.candidaturas.map((cd, j) => `
+            <div class="candidatura-row">
+              <input type="text" value="${cd.nombre.replace(/"/g, '&quot;')}" placeholder="Sindicato" onchange="colegios[${i}].candidaturas[${j}].nombre=this.value">
+              <input type="number" value="${cd.votos}" min="0" placeholder="Votos" onchange="colegios[${i}].candidaturas[${j}].votos=parseInt(this.value)||0">
+              <button class="remove-btn" onclick="window.removeCandidatura(${i},${j})"><span>×</span></button>
+            </div>
+          `).join('')}
+        </div>
+        <div class="grid-2" style="margin-top:0.6rem">
+          <div><label>Votos en blanco</label><input type="number" min="0" value="${col.blancos}" onchange="colegios[${i}].blancos=parseInt(this.value)||0"></div>
+          <div><label>Votos nulos</label><input type="number" min="0" value="${col.nulos}" onchange="colegios[${i}].nulos=parseInt(this.value)||0"></div>
+        </div>
+        <button class="btn btn-danger" style="margin-top:0.5rem; width:100%" onclick="window.removeColegio(${i})">× Eliminar</button>
+      `;
+      c.appendChild(div);
+    });
+  };
+
+  window.addColegio = function() {
+    colegios.push({ nombre:`Colegio ${colegios.length+1}`, trabajadores:50, candidaturas:JSON.parse(JSON.stringify(defaultCands)), blancos:0, nulos:0 });
+    renderColegios();
+  };
+  window.removeColegio = function(i) { colegios.splice(i,1); renderColegios(); };
+  window.addCandidatura = function(i) { colegios[i].candidaturas.push({nombre:'Otra', votos:0}); renderColegios(); };
+  window.removeCandidatura = function(i,j) { colegios[i].candidaturas.splice(j,1); renderColegios(); };
+
+  document.getElementById('add-colegio').addEventListener('click', window.addColegio);
+  document.getElementById('limpiar').addEventListener('click', () => {
+    colegios=[]; document.getElementById('empresa').value=''; document.getElementById('censo-total').value=400;
+    document.getElementById('resultados').classList.add('hidden');
+    Object.values(charts).forEach(c=>c.destroy()); charts={}; renderColegios(); window.addColegio();
+  });
+
+  // ==================== CÁLCULO ====================
+  document.getElementById('calcular').addEventListener('click', () => {
+    const emp = document.getElementById('empresa').value.trim();
+    const censo = parseInt(document.getElementById('censo-total').value)||0;
+    if(!emp) return alert('Introduce el nombre de la empresa');
+    if(censo<6) return alert('Censo mínimo: 6 trabajadores');
+    if(!colegios.length) return alert('Añade al menos un colegio');
+
+    const tColegios = colegios.reduce((s,c)=>s+c.trabajadores, 0);
+    if(tColegios !== censo) return alert(`Suma de trabajadores (${tColegios}) debe coincidir con censo (${censo})`);
+
+    for(let i=0; i<colegios.length; i++) {
+      const sumVotos = colegios[i].candidaturas.reduce((s,c)=>s+(parseInt(c.votos)||0), 0) + colegios[i].blancos + colegios[i].nulos;
+      if(sumVotos > colegios[i].trabajadores) return alert(`Error en ${colegios[i].nombre}: Votos (${sumVotos}) superan censo (${colegios[i].trabajadores})`);
+    }
+
+    const delTotal = calcularDelegados(censo);
+    const delPorColegio = repartirDelegadosPorColegios(delTotal, colegios);
+    let resGlob={}, votGlob={}, htmlDesglose='', htmlHareTable='';
+
+    colegios.forEach((col, i) => {
+      const votCand = {};
+      let blancos = 0;
+      col.candidaturas.forEach(c => {
+        const nombre = c.nombre || `SinNombre${i}`;
+        if (nombre.toLowerCase() === 'en blanco') blancos += parseInt(c.votos)||0;
+        else votCand[nombre] = parseInt(c.votos)||0;
+      });
+      blancos += col.blancos;
+      
+      const { resultado: rep, tabla, cociente, validos, umbral } = calcularHareConDetalle(votCand, delPorColegio[i], blancos);
+      
+      Object.entries(votCand).forEach(([k,v]) => votGlob[k]=(votGlob[k]||0)+v);
+      Object.entries(rep).forEach(([k,v]) => resGlob[k]=(resGlob[k]||0)+v);
+
+      if(i===0 && tabla?.length) {
+        htmlHareTable = `
+          <p><strong>Tabla Hare:</strong> Cociente = ${cociente.toFixed(2)}</p>
+          <table>
+            <thead><tr><th>Candidatura</th><th>Votos</th><th>Votos÷cociente</th><th>Enteros</th><th>Resto</th><th>Delegados</th></tr></thead>
+            <tbody>
+              ${tabla.map(row => `
+                <tr class="${row.sobrante ? 'assigned' : ''}">
+                  <td><strong>${row.candidatura}</strong></td>
+                  <td>${row.votos}</td>
+                  <td>${row.cocienteStr}</td>
+                  <td>${row.enteros - (row.sobrante ? 1 : 0)}</td>
+                  <td>${row.resto.toFixed(2)}</td>
+                  <td><strong>${row.enteros}${row.sobrante ? ' *' : ''}</strong></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <p style="font-size:0.8rem; margin-top:0.4rem">* = puesto asignado por resto mayor | Cociente: ${cociente.toFixed(2)} | Válidos: ${validos}</p>
+        `;
+      }
+
+      htmlDesglose += `<div class="card page-break-inside"><h4>${col.nombre} (${col.trabajadores} trab. · ${delPorColegio[i]} delegados)</h4>
+        <table>
+          <thead><tr><th>Candidatura</th><th>Votos</th><th>% V.V.</th><th>Delegados</th></tr></thead>
+          <tbody>
+            ${col.candidaturas.filter(c => (c.nombre||'').toLowerCase() !== 'en blanco').map(c=>{
+              const nombre = c.nombre || `SinNombre${i}`;
+              const p = validos>0 ? ((c.votos/validos)*100).toFixed(2) : '0.00';
+              const e = rep[nombre] || 0;
+              return `<tr><td>${nombre}</td><td>${c.votos}</td><td>${p}%</td><td><strong>${e}</strong></td></tr>`;
+            }).join('')}
+            <tr style="background:rgba(255,255,255,0.05)"><td>En blanco</td><td>${blancos}</td><td>${validos>0 ? ((blancos/validos)*100).toFixed(2) : '0.00'}%</td><td>—</td></tr>
+            <tr style="background:rgba(255,255,255,0.05)"><td>Nulos</td><td>${col.nulos}</td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table></div>`;
+    });
+
+    document.getElementById('desglose-colegios').innerHTML = htmlDesglose;
+    document.getElementById('pdf-meta').innerHTML = `Empresa: ${emp} | Fecha: ${new Date().toLocaleDateString('es-ES')}`;
+    document.getElementById('summary-stats').innerHTML = `
+      <div class="stat-box"><div class="num">${emp}</div><div class="label">Empresa</div></div>
+      <div class="stat-box"><div class="num">${censo}</div><div class="label">Censo</div></div>
+      <div class="stat-box"><div class="num">${delTotal}</div><div class="label">Delegados</div></div>
+      <div class="stat-box"><div class="num">${colegios.length}</div><div class="label">Colegios</div></div>`;
+
+    document.getElementById('hare-table-container').innerHTML = htmlHareTable || '<p style="color:var(--text-muted)">Introduce votos para ver la tabla Hare</p>';
+
+    const labels = Object.keys(votGlob);
+    const dVotos = labels.map(k=>votGlob[k]), dDel = labels.map(k=>resGlob[k]||0);
+    const colorMap = { 'UGT': '#e63946', 'CCOO': '#64b5f6', 'USO': '#81c784', 'CGT': '#ffb74d', 'CSIF': '#ce93d8' };
+    const palette = ['#64b5f6','#81c784','#ffb74d','#ce93d8','#4fc3f7','#a5d6a7','#ffcc80','#e1bee7'];
+    let paletteIdx = 0;
+    const cols = labels.map(label => {
+      const normLabel = label.trim().toUpperCase();
+      const match = Object.keys(colorMap).find(k => normLabel.includes(k));
+      return match ? colorMap[match] : palette[paletteIdx++ % palette.length];
+    });
+
+    document.getElementById('resultados').classList.remove('hidden');
+    if(charts.votos) charts.votos.destroy(); if(charts.delegados) charts.delegados.destroy();
+    charts.votos = new Chart(document.getElementById('chart-votos'), { type:'bar', data: { labels, datasets:[{ label:'Votos', data:dVotos, backgroundColor:cols }] }, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}} });
+    charts.delegados = new Chart(document.getElementById('chart-delegados'), { type:'doughnut', data: { labels, datasets:[{ data:dDel, backgroundColor:cols }] }, options:{responsive:true, maintainAspectRatio:false} });
+    document.getElementById('resultados').scrollIntoView({behavior:'smooth'});
+  });
+
+  // ==================== PDF ====================
+  window.generatePDF = async () => {
+    const el = document.getElementById('resultados');
+    const emp = document.getElementById('empresa').value.replace(/[^a-zA-Z0-9áéíóúñÑ ]/g,'_') || 'empresa';
+    const opt = { margin:[0.4,0.4,0.4,0.4], filename:`Acta_${emp}.pdf`, image:{type:'jpeg',quality:0.95}, html2canvas:{scale:2}, jsPDF:{unit:'in',format:'a4',orientation:'portrait'} };
+    document.querySelectorAll('.no-print').forEach(e=>e.style.display='none');
+    document.getElementById('pdf-header').style.display='block'; el.style.display='block';
+    try { await html2pdf().set(opt).from(el).save(); } finally { document.querySelectorAll('.no-print').forEach(e=>e.style.display=''); document.getElementById('pdf-header').style.display='none'; }
+  };
+
+  // ==================== BOTTOM NAVIGATION ====================
+  const tabs = { calculadora: document.getElementById('tabCalculadora'), info: document.getElementById('tabInfo'), ayuda: document.getElementById('tabAyuda') };
+  const contenido = document.getElementById('mainContent');
+  const originalHTML = contenido.innerHTML;
+
+  function setActiveTab(activeId) {
+    Object.values(tabs).forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`tab${activeId.charAt(0).toUpperCase() + activeId.slice(1)}`).classList.add('active');
+  }
+
+  tabs.calculadora.addEventListener('click', () => {
+    setActiveTab('calculadora');
+    location.reload();
+  });
+
+  tabs.info.addEventListener('click', () => {
+    setActiveTab('info');
+    contenido.innerHTML = `
+      <div class="card">
+        <h3 style="color:var(--primary); margin-bottom: 1rem;">Base Legal</h3>
+        <p><strong>Artículo 71.2 del Estatuto de los Trabajadores (ET)</strong></p>
+        <p style="margin-top: 0.5rem;">Establece el sistema de representación sindical mediante elecciones con delegados de personal y comités de empresa.</p>
+        <p style="margin-top: 1rem;"><strong>RD 1844/1994 · Artículo 12</strong></p>
+        <p>Regula el <strong>Método Hare</strong> (cociente y restos mayores) para la asignación de delegados:</p>
+        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+          <li>Cociente electoral = votos válidos ÷ puestos a cubrir</li>
+          <li>Asignación de enteros por cociente</li>
+          <li>Restos mayores para puestos sobrantes</li>
+          <li>Umbral mínimo: 5% de votos válidos</li>
+        </ul>
+      </div>
+    `;
+  });
+
+  tabs.ayuda.addEventListener('click', () => {
+    setActiveTab('ayuda');
+    contenido.innerHTML = `
+      <div class="card">
+        <h3 style="color:var(--primary);">Instrucciones de uso</h3>
+        <ol style="margin-top: 1rem; padding-left: 1.2rem;">
+          <li>Introduce el nombre de la empresa y el censo total</li>
+          <li>Añade colegios electorales (si hay más de uno)</li>
+          <li>Para cada colegio, añade candidaturas y sus votos</li>
+          <li>Registra votos en blanco y nulos</li>
+          <li>Pulsa "Calcular" para ver la distribución según método Hare</li>
+          <li>Genera PDF del acta provisional</li>
+        </ol>
+        <div class="alert alert-info" style="margin-top: 1rem;">
+          <strong>Nota:</strong> Esta herramienta es de apoyo. Los resultados finales deben ser validados por la Mesa Electoral.
+        </div>
+      </div>
+    `;
+  });
+
+  // Inicializar
+  window.addColegio();
+  document.getElementById('censo-total').dispatchEvent(new Event('input'));
+</script>
+</body>
+</html>
